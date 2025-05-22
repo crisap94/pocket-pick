@@ -42,7 +42,7 @@ class PathValidator:
         # Check for absolute paths to sensitive locations (except temp files)
         if not is_temp_file:
             sensitive_paths = [
-                "/etc/", "/root/", "/home/", "/var/", "/usr/", "/sys/", "/proc/",
+                "/etc/", "/root/", "/var/", "/usr/", "/sys/", "/proc/",
                 "/boot/", "/dev/", "/lib/", "/sbin/", "/bin/"
             ]
             
