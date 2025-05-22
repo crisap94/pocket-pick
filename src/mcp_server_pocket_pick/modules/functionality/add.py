@@ -6,6 +6,7 @@ from pathlib import Path
 import logging
 from ..data_types import AddCommand, PocketItem
 from ..init_db import init_db, normalize_tags
+from ..security import PathValidator, SecurityError, sanitize_error_message
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +22,15 @@ def add(command: AddCommand) -> PocketItem:
         
     Raises:
         sqlite3.IntegrityError: If an item with the same ID already exists
+        SecurityError: If database path is invalid
     """
+    # Validate database path
+    try:
+        validated_db_path = PathValidator.validate_db_path(command.db_path)
+    except SecurityError as e:
+        logger.error(f"Database path validation failed: {e}")
+        raise SecurityError(sanitize_error_message(str(e)))
+    
     # Normalize tags
     normalized_tags = normalize_tags(command.tags)
     
@@ -31,8 +40,8 @@ def add(command: AddCommand) -> PocketItem:
     # Get current timestamp
     timestamp = datetime.now()
     
-    # Connect to database
-    db = init_db(command.db_path)
+    # Connect to database using validated path
+    db = init_db(validated_db_path)
     
     try:
         # Serialize tags to JSON
